@@ -50,4 +50,5 @@ class Guerreiro(nome: String) : Personagem(nome) {
     private fun hasArma(): Boolean {
         return armas.isNotEmpty()
     }
+
 }
