@@ -1,11 +1,15 @@
 package personagens
 
+import equipamentos.Arma
+import equipamentos.Cajado
+import equipamentos.Espada
 import java.util.*
 
 abstract class Personagem(val nome: String) {
 
     var nivelEnergia    = 100f
     var poderDefesa     = 0
+    var armas: MutableList<Arma> = mutableListOf()
 
     abstract val SOCO: Float
     abstract val CHUTE: Float
@@ -17,15 +21,17 @@ abstract class Personagem(val nome: String) {
         if (p.isAlive()) {
             if (!esquivou()) {
                 if (poderAtaque > this.poderDefesa) {
-                    val dano = poderAtaque - this.poderDefesa
-                    if (dano >= nivelEnergia) nivelEnergia = 0f
-                    else nivelEnergia -= dano
-                    print(" -$dano hp")
+                    var dano = poderAtaque - this.poderDefesa
+                    //if (dano >= nivelEnergia) nivelEnergia = 0f
+                    //else nivelEnergia -= dano
+                    if (dano >= nivelEnergia) dano = nivelEnergia
+                    nivelEnergia -= dano
+                    print(" ${nome.toUpperCase()} -$dano hp")
                 } else {
                     println("$nome se defendeu do golpe de ${p.nome}!")
                 }
             } else {
-                print("\n${this.nome} esquivou do ataque! Nenhum dano!")
+                print("\n${this.nome} esquivou do ataque de ${p.nome}! Nenhum dano!")
             }
         }
     }
@@ -59,6 +65,29 @@ abstract class Personagem(val nome: String) {
 
     fun getChance(bound: Int): Int {
         return 1 + random.nextInt()%bound
+    }
+
+    fun hasArma(): Boolean {
+        return armas.isNotEmpty()
+    }
+
+    fun gerarArma(dono: Personagem): Arma? {
+        if (dono is Guerreiro) return Espada(dono)
+        else if (dono is Feiticeiro) return Cajado(dono)
+        return null
+    }
+
+    fun atacarIfHasArma(atacante: Personagem, atacado: Personagem) {
+        val sortArma: Arma
+        if (hasArma()) {
+            sortArma = armas[random.nextInt(armas.count())]
+            atacado.defender(atacante, sortArma.usar())
+        }
+        else atacado.defender(atacante, chutar())
+    }
+
+    fun quarterOfChance(): Boolean {
+        return 1+random.nextInt()%4 == 1
     }
 
 }
