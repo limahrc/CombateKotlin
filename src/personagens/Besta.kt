@@ -1,10 +1,18 @@
 package personagens
 
+import equipamentos.Armadura
+
 class Besta(nome: String) : Personagem(nome) {
     override val SOCO   = 30f
     override val CHUTE  = 35f
 
     private val ATAQUE_GARRAS = 39f
+
+    init {
+        if (getChance(4)==1){
+            armadura = Armadura(this)
+        }
+    }
 
     override fun atacar(p: Personagem) {
         var chance: Int

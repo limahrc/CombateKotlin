@@ -2,39 +2,19 @@ package equipamentos
 
 import personagens.Personagem
 
-abstract class Arma(private val dono: Personagem) {
+abstract class Arma : Equipamento() {
 
-    var dano            = 0f
-    var durabilidade    = 0f
 
-    protected abstract val tipo: String
-    private val DESGASTE = 10
+    abstract fun usar(atacante: Personagem, atacado: Personagem)
 
-    init {
-        this.durabilidade = 100f
-    }
-
-    private fun isUtil(): Boolean {
-        return durabilidade>0
-    }
-
-    fun usar(): Float {
-        return if (isUtil()) {
-            print("${dono.nome} deu um golpe de $tipo!")
-            desgastar()
-            dano
+    fun getTipo(): String {
+        when {
+            this is Espada  -> return "espada"
+            this is Machado -> return "machado"
+            this is Cajado  -> return  "cajado"
         }
-        else {
-            print("$tipo não tem mais durabilidade")
-            0f
-        }
-
+        return ""
     }
 
-    private fun desgastar(){
-        if (durabilidade>DESGASTE) {
-            durabilidade -= DESGASTE
-        } else durabilidade = 0f
-    }
 
 }

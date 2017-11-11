@@ -2,13 +2,11 @@ package equipamentos
 
 import personagens.Personagem
 
-class Espada(val dono: Personagem) : Arma(), ArmaCortante {
+class Machado(private val dono: Personagem) : Arma(), ArmaCortante {
+    override val DESGASTE = 10
 
-    override val DESGASTE = 20
-
-    private val CORTE_TRANSVERSAL   = 15f
-    private val GOLPE_PERFURANTE    = 25f
-
+    private val CORTE_TRANSVERSAL = 15f
+    private val INVESTIDA = 10f
 
     override fun usar(atacante: Personagem, atacado: Personagem) {
         if (this.isUtil()) {
@@ -16,7 +14,7 @@ class Espada(val dono: Personagem) : Arma(), ArmaCortante {
             when (chance) {
                 1 -> decaptar(atacado)
                 2 -> atacado.defender(atacante, corteTransversal())
-                else -> atacado.defender(atacante, perfurar())
+                else -> atacado.defender(atacante, investida())
             }
             desgastar()
         } else print("${getTipo()} não tem mais durabilidade")
@@ -28,13 +26,12 @@ class Espada(val dono: Personagem) : Arma(), ArmaCortante {
     }
 
     override fun corteTransversal(): Float {
-        print("${dono.nome} deu um corte transversal de espada!")
+        print("${dono.nome} deu um corte transversal com machado!")
         return CORTE_TRANSVERSAL
     }
 
-    private fun perfurar(): Float {
-        print("${dono.nome} perfurou o oponente com a espada!")
-        return GOLPE_PERFURANTE
+    private fun investida(): Float {
+        print("${dono.nome} deu uma investida com machado sobre o oponente!")
+        return INVESTIDA
     }
-
 }

@@ -1,5 +1,7 @@
 package personagens
 
+import equipamentos.Armadura
+
 class Guerreiro(nome: String) : Personagem(nome) {
 
     override val SOCO       = 20f
@@ -8,8 +10,9 @@ class Guerreiro(nome: String) : Personagem(nome) {
     private val PODER_CURA  = 25f
 
     init {
-        if (quarterOfChance()){
+        if (getChance(2)==1){
             armas.add(this.gerarArma(this)!!)
+            armadura = Armadura(this)
         }
     }
 

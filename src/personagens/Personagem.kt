@@ -1,8 +1,6 @@
 package personagens
 
-import equipamentos.Arma
-import equipamentos.Cajado
-import equipamentos.Espada
+import equipamentos.*
 import java.util.*
 
 abstract class Personagem(val nome: String) {
@@ -10,28 +8,31 @@ abstract class Personagem(val nome: String) {
     var nivelEnergia    = 100f
     var poderDefesa     = 0
     var armas: MutableList<Arma> = mutableListOf()
+    var armadura: Armadura? = null
 
     abstract val SOCO: Float
     abstract val CHUTE: Float
-    val random = Random()
+    private val random = Random()
+    private val DESGASTE_DEFESA = 10
 
     abstract fun atacar(p: Personagem)
 
-    fun defender(p: Personagem, poderAtaque: Float){
-        if (p.isAlive()) {
+    fun defender(atacante: Personagem, poderAtaque: Float){
+        if (atacante.isAlive()) {
             if (!esquivou()) {
                 if (poderAtaque > this.poderDefesa) {
                     var dano = poderAtaque - this.poderDefesa
-                    //if (dano >= nivelEnergia) nivelEnergia = 0f
-                    //else nivelEnergia -= dano
                     if (dano >= nivelEnergia) dano = nivelEnergia
                     nivelEnergia -= dano
+                    if (armadura != null) armadura!!.desgastar()
+                    if (DESGASTE_DEFESA <= poderDefesa) poderDefesa -= DESGASTE_DEFESA
                     print(" ${nome.toUpperCase()} -$dano hp")
                 } else {
-                    println("$nome se defendeu do golpe de ${p.nome}!")
+                    if (DESGASTE_DEFESA <= poderDefesa) poderDefesa -= DESGASTE_DEFESA
+                    print(" $nome se defendeu do golpe de ${atacante.nome}!")
                 }
             } else {
-                print("\n${this.nome} esquivou do ataque de ${p.nome}! Nenhum dano!")
+                print("\n${this.nome} esquivou do ataque de ${atacante.nome}! Nenhum dano!")
             }
         }
     }
@@ -50,13 +51,23 @@ abstract class Personagem(val nome: String) {
         return CHUTE
     }
 
-    fun esquivou(): Boolean {
+    private fun esquivou(): Boolean {
         val random = Random()
         return ((1 + random.nextInt()%4) == 1)
     }
 
     fun apresentar() {
-        println("\nNOME: $nome\nENERGIA: $nivelEnergia\nDEFESA: $poderDefesa")
+        var classe = ""
+        when {
+            this is Guerreiro -> classe = "Guerreiro"
+            this is Feiticeiro -> classe = "Feiticeiro"
+            this is Besta -> classe = "Besta"
+        }
+        println("\nNOME: $nome\n" +
+                "CLASSE: $classe\n" +
+                "ENERGIA: $nivelEnergia\n" +
+                "ARMAS: ${this.contarArmas()}\n" +
+                "DEFESA: $poderDefesa")
     }
 
     fun status(){
@@ -72,22 +83,51 @@ abstract class Personagem(val nome: String) {
     }
 
     fun gerarArma(dono: Personagem): Arma? {
-        if (dono is Guerreiro) return Espada(dono)
-        else if (dono is Feiticeiro) return Cajado(dono)
+        if (dono is Guerreiro) {
+            return when(getChance(2)) {
+                1 -> Espada(dono)
+                else -> Machado(dono)
+            }
+        }
+        else if (dono is Feiticeiro) {
+            return when (getChance(2)) {
+                1 -> Livro(dono)
+                else -> Cajado(dono)
+            }
+        }
         return null
     }
+
 
     fun atacarIfHasArma(atacante: Personagem, atacado: Personagem) {
         val sortArma: Arma
         if (hasArma()) {
             sortArma = armas[random.nextInt(armas.count())]
-            atacado.defender(atacante, sortArma.usar())
+            sortArma.usar(atacante, atacado)
         }
         else atacado.defender(atacante, chutar())
     }
 
-    fun quarterOfChance(): Boolean {
-        return 1+random.nextInt()%4 == 1
+    private fun contarArmas(): String {
+        if (hasArma()){
+            if (this is Guerreiro){
+                var espadas=0
+                var machados=0
+                for (i in armas){
+                    if (i is Espada) espadas++
+                    else if (i is Machado) machados++
+                }
+                return "$espadas espada(s) e $machados machado(s)"
+            } else if (this is Feiticeiro){
+                var cajados=0
+                var livros=0
+                for (i in armas){
+                    if (i is Cajado) cajados++
+                    else if (i is Livro) livros++
+                }
+                return "$cajados cajado(s) e $livros livro(s)"
+            }
+        }
+        return "não possui armas"
     }
-
 }
